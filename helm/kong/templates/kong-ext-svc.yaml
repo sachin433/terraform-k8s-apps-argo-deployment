@@ -1,0 +1,19 @@
+{{ if .Values.nginxIngressIntLB }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-internal-ing-svc
+  namespace: example-apps
+spec:
+  type: ExternalName
+  externalName: {{ .Values.nginxIngressIntLB | quote }}
+{{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-redis-host
+  namespace: example-apps
+spec:
+  type: ExternalName
+  externalName: {{ .Values.redisHostIp | quote }}

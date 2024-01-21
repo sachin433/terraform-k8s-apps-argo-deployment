@@ -1,0 +1,58 @@
+image:
+  repository: kong/kong-gateway
+  tag: "3.4"
+
+secretVolumes:
+- kong-cluster-cert
+
+admin:
+  enabled: false
+
+env:
+  role: data_plane
+  database: "off"
+  cluster_mtls: pki
+  cluster_control_plane: 8ae4abfe6b.us.cp0.konghq.com:443
+  cluster_server_name: 8ae4abfe6b.us.cp0.konghq.com
+  cluster_telemetry_endpoint: 8ae4abfe6b.us.tp0.konghq.com:443
+  cluster_telemetry_server_name: 8ae4abfe6b.us.tp0.konghq.com
+  cluster_cert: /etc/secrets/kong-cluster-cert/tls.crt
+  cluster_cert_key: /etc/secrets/kong-cluster-cert/tls.key
+  lua_ssl_trusted_certificate: system
+  konnect_mode: "on"
+  vitals: "off"
+  datadog_agent_host:
+    valueFrom:
+      fieldRef:
+        fieldPath: status.hostIP
+
+ingressController:
+  enabled: false
+  installCRDs: false
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  behavior: {}
+  ## targetCPUUtilizationPercentage only used if the cluster doesn't support autoscaling/v2 or autoscaling/v2beta
+  targetCPUUtilizationPercentage:
+  ## Otherwise for clusters that do support autoscaling/v2 or autoscaling/v2beta, use metrics
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+#Nginx Ingress Internal LB DNS
+nginxIngressIntLB: "api.example.internal"
+
+#redis host IP
+redisHostIp: "kong.cache.example.internal"
+
+plugins:
+   configMaps:
+   - name: kong-plugin-auth-request
+     pluginName: kong-auth-request
